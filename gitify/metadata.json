@@ -1,0 +1,15 @@
+{
+  "KPackageStructure": "KWin/Script",
+  "KPlugin": {
+    "Id": "gitify",
+    "Name": "Gitify",
+    "Description": "Place Gitify beside the panel on KDE Plasma",
+    "Version": "0.1.0",
+    "License": "MIT",
+    "Authors": [{ "Name": "Gitify Team" }],
+    "Website": "https://gitify.io",
+    "EnabledByDefault": false
+  },
+  "X-Plasma-API": "javascript",
+  "X-Plasma-MainScript": "code/main.js"
+}

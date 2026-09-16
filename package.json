@@ -1,0 +1,14 @@
+{
+  "name": "@gitify-app/kde",
+  "version": "0.1.0",
+  "private": true,
+  "description": "KWin script that positions Gitify beside the KDE Plasma panel",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-isolation=none tests/*.test.js",
+    "test:live": "python3 scripts/test-live.py",
+    "bundle": "bash scripts/bundle.sh"
+  },
+  "engines": { "node": ">=24" }
+}
