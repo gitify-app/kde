@@ -1,5 +1,7 @@
 # Gitify for KDE Plasma
 
+[![Install from the KDE Store](https://img.shields.io/badge/KDE_Store-Install-1D99F3?logo=kde&logoColor=white)](https://store.kde.org/p/2371508/)
+
 A KWin script that places Gitify beside the panel on native Wayland.
 
 When you click Gitify's tray icon, the popup opens next to the click position. Keyboard opens reuse the last panel anchor. Before the first tray click, it opens at the end of a panel on the pointer's display, or in the top-right corner when no panel is available.
