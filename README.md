@@ -12,7 +12,21 @@ KWin does not expose individual system-tray icon rectangles to scripts. The scri
 
 Requires KDE Plasma 6 on Wayland and Gitify 7.8 or newer. Tested with Plasma 6.7.5 and Gitify 7.8.0. Keep Gitify's **Use X11 backend** setting off.
 
-Install Gitify first. On Arch Linux and derivatives, use the [Gitify Arch package](https://github.com/gitify-app/arch#build-and-install-locally). For other distributions, use a [Gitify release](https://github.com/gitify-app/gitify/releases).
+Install Gitify first. On Arch Linux and derivatives, use [`gitify-bin` from the AUR](https://aur.archlinux.org/packages/gitify-bin). For other distributions, use a [Gitify release](https://github.com/gitify-app/gitify/releases).
+
+### From the KDE Store
+
+Get [Gitify for KDE Plasma on the KDE Store](https://store.kde.org/p/2371508/):
+
+1. Open **System Settings → Window Management → KWin Scripts → Get New Scripts**.
+2. Search for **Gitify for KDE Plasma** and install it.
+3. Enable **Gitify** in KWin Scripts and apply.
+
+You can also download `gitify.kwinscript` from the Store page and import it with **Install from File** in KWin Scripts, then enable Gitify and apply.
+
+Click Gitify's tray icon to check the placement.
+
+### From source
 
 Clone this repository and run the installer from your Plasma session:
 
@@ -27,6 +41,8 @@ The installer uses `kpackagetool6`, `kwriteconfig6`, and `qdbus6`. It installs f
 To update, run `git pull --ff-only` in this checkout and rerun `bash scripts/install.sh`.
 
 Alternatively, run `npm run bundle` and import `dist/gitify.kwinscript` through **System Settings → Window Management → KWin Scripts → Install from File**. Enable Gitify and apply.
+
+### Disable or uninstall
 
 To disable, uncheck Gitify in KWin Scripts. To uninstall:
 
