@@ -144,7 +144,10 @@ callDBus('{SERVICE}', '/Test', '{INTERFACE}', 'Report', JSON.stringify({{
                     assert after["frame"] != before["frame"], "Script did not change placement"
 
                 log.flush()
-                endpoint = re.search(r"ws://127\.0\.0\.1:\d+/[\w-]+", (temporary / "app.log").read_text()).group()
+                # Gitify is launched with --inspect=127.0.0.1:0, so its DevTools inspector only binds
+                # to the loopback interface. The plain "ws" URL below therefore stays on this machine
+                # and cannot be reached from outside; the DevTools endpoint also offers no TLS.
+                endpoint = re.search(r"ws://127\.0\.0\.1:\d+/[\w-]+", (temporary / "app.log").read_text()).group()  # NOSONAR(S5332)
                 expression = f"""(() => {{
 const electron = process.getBuiltinModule('module').createRequire(process.resourcesPath + '/app.asar/package.json')('electron');
 electron.BrowserWindow.getAllWindows()[0].setSize({frame['width']}, {frame['height'] + 100});
