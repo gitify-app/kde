@@ -5,7 +5,7 @@ Thanks for your interest in contributing to Gitify for KDE Plasma!
 This repository holds the KWin script only. See the [README](README.md) for what
 it does and how to install it, and [Gitify][gitify-repo] for the app itself.
 
-## Development
+## 🛠️ Development
 
 ```sh
 npm test
