@@ -1,4 +1,4 @@
-# 💠 Gitify for KDE Plasma
+# 🐧 Gitify for KDE Plasma
 
 [![Install from the KDE Store](https://img.shields.io/badge/KDE_Store-Install-1D99F3?logo=kde&logoColor=white)](https://store.kde.org/p/2371508/)
 
