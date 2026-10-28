@@ -10,5 +10,12 @@
     "test:live": "python3 scripts/test-live.py",
     "bundle": "bash scripts/bundle.sh"
   },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.22.1",
+      "onFail": "warn"
+    }
+  },
   "engines": { "node": ">=24" }
 }
