@@ -6,6 +6,9 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
+    "lint": "oxlint --fix",
+    "lint:check": "oxlint",
+    "lint:ci": "oxlint --format=github",
     "test": "node --test --test-isolation=none tests/*.test.js",
     "test:live": "python3 scripts/test-live.py",
     "bundle": "bash scripts/bundle.sh"
@@ -22,5 +25,8 @@
       "onFail": "download"
     }
   },
-  "engines": { "node": ">=24" }
+  "engines": { "node": ">=24" },
+  "devDependencies": {
+    "oxlint": "1.90.0"
+  }
 }
