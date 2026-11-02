@@ -12,7 +12,7 @@ KWin does not expose individual system-tray icon rectangles to scripts. The scri
 
 ## 🚀 Install
 
-Requires KWin 6 on Wayland, the window manager of KDE Plasma 6, and Gitify 7.8 or newer. It works with Plasma's own panels and with bars from other shells that run on KWin, such as Caelestia. Tested with Plasma 6.7.5 and Gitify 7.8.0, and with Plasma 6.8.2 and Gitify 7.10.0 under Caelestia.
+Requires KWin 6 on Wayland, the window manager of KDE Plasma 6, and Gitify 7.8 or newer. It works with Plasma's own panels and with bars from other shells that run on KWin, such as Caelestia.
 
 Keep Gitify's **Use X11 backend** setting off. That setting runs Gitify under XWayland so it can place its own popup, at the cost of native Wayland scaling. This script places the popup for Gitify's native Wayland window instead.
 
