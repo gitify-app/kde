@@ -15,6 +15,11 @@
       "name": "node",
       "version": "26.13.0",
       "onFail": "warn"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.16.1",
+      "onFail": "download"
     }
   },
   "engines": { "node": ">=24" }

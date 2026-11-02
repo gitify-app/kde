@@ -44,7 +44,7 @@ The installer uses `kpackagetool6`, `kwriteconfig6`, and `qdbus6`. It installs f
 
 To update, run `git pull --ff-only` in this checkout and rerun `bash scripts/install.sh`.
 
-Alternatively, build the bundle with `npm run bundle`, which needs Node 24 or newer and Python 3. Import `dist/gitify.kwinscript` through **System Settings → Window Management → KWin Scripts → Install from File**, then enable Gitify and apply.
+Alternatively, build the bundle with `pnpm bundle`. The Node version is pinned in `.nvmrc`; Python 3 is provided by your system. Import `dist/gitify.kwinscript` through **System Settings → Window Management → KWin Scripts → Install from File**, then enable Gitify and apply.
 
 ### ✅ Check that it works
 
