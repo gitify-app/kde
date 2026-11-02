@@ -12,7 +12,9 @@ KWin does not expose individual system-tray icon rectangles to scripts. The scri
 
 ## 🚀 Install
 
-Requires KDE Plasma 6 on Wayland and Gitify 7.8 or newer. Tested with Plasma 6.7.5 and Gitify 7.8.0. Keep Gitify's **Use X11 backend** setting off.
+Requires KWin 6 on Wayland, the window manager of KDE Plasma 6, and Gitify 7.8 or newer. It works with Plasma's own panels and with bars from other shells that run on KWin, such as Caelestia. Tested with Plasma 6.7.5 and Gitify 7.8.0, and with Plasma 6.8.2 and Gitify 7.10.0 under Caelestia.
+
+Keep Gitify's **Use X11 backend** setting off. That setting runs Gitify under XWayland so it can place its own popup, at the cost of native Wayland scaling. This script places the popup for Gitify's native Wayland window instead.
 
 Install Gitify first. On Arch Linux and derivatives, use [`gitify-bin` from the AUR](https://aur.archlinux.org/packages/gitify-bin). For other distributions, use a [Gitify release](https://github.com/gitify-app/gitify/releases).
 
@@ -20,13 +22,13 @@ Install Gitify first. On Arch Linux and derivatives, use [`gitify-bin` from the 
 
 Get [Gitify for KDE Plasma on the KDE Store](https://store.kde.org/p/2371508/):
 
-1. Open **System Settings → Window Management → KWin Scripts → Get New Scripts**.
+1. Open **System Settings → Window Management → KWin Scripts → Get New…**.
 2. Search for **Gitify for KDE Plasma** and install it.
 3. Enable **Gitify** in KWin Scripts and apply.
 
 You can also download `gitify.kwinscript` from the Store page and import it with **Install from File** in KWin Scripts, then enable Gitify and apply.
 
-Click Gitify's tray icon to check the placement.
+Updates appear in the same **Get New…** dialog.
 
 ### 🧰 From source
 
@@ -38,15 +40,31 @@ cd kde
 bash scripts/install.sh
 ```
 
-The installer uses `kpackagetool6`, `kwriteconfig6`, and `qdbus6`. It installs for your user and enables the script without restarting Plasma. Click Gitify's tray icon to check the placement.
+The installer uses `kpackagetool6`, `kwriteconfig6`, and `qdbus6`. It installs for your user and enables the script without restarting Plasma.
 
 To update, run `git pull --ff-only` in this checkout and rerun `bash scripts/install.sh`.
 
-Alternatively, run `npm run bundle` and import `dist/gitify.kwinscript` through **System Settings → Window Management → KWin Scripts → Install from File**. Enable Gitify and apply.
+Alternatively, build the bundle with `npm run bundle`, which needs Node 24 or newer and Python 3. Import `dist/gitify.kwinscript` through **System Settings → Window Management → KWin Scripts → Install from File**, then enable Gitify and apply.
+
+### ✅ Check that it works
+
+Click Gitify's tray icon. The popup should open next to the icon, on the side facing the middle of the display, and stay above other windows.
+
+If it opens in a corner of the display instead:
+
+1. Check that the script is running. This prints `true` when it is:
+
+   ```sh
+   qdbus6 org.kde.KWin /Scripting org.kde.kwin.Scripting.isScriptLoaded gitify
+   ```
+
+   If it prints `false`, enable Gitify in KWin Scripts and apply.
+2. Check that Gitify's **Use X11 backend** setting is off, then restart Gitify.
+3. Open Gitify from its tray icon rather than a keyboard shortcut. Until the first tray click, the script has no icon position and uses a fallback: the end of a panel, or the top-right corner when it finds no panel.
 
 ### 🚫 Disable or uninstall
 
-To disable, uncheck Gitify in KWin Scripts. To uninstall:
+To disable, uncheck Gitify in KWin Scripts and apply. To uninstall, remove it in KWin Scripts, or run:
 
 ```sh
 kwriteconfig6 --file kwinrc --group Plugins --key gitifyEnabled false
