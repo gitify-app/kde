@@ -1,4 +1,6 @@
 const GAP = 8;
+// How far from a display edge a tray click can be when no panel is found there.
+const EDGE_REACH = 64;
 const windows = new Map();
 let lastAnchor = null;
 
@@ -64,11 +66,90 @@ function placement(size, area, anchor) {
   };
 }
 
-function panelWindows() {
-  return workspace.windowList().filter((window) =>
-    window.dock && String(window.resourceClass) === 'plasmashell' &&
-    window.frameGeometry.width > 0 && window.frameGeometry.height > 0,
+// Shells such as Caelestia draw their bar inside one dock surface that covers
+// the whole display, which gives no panel edge to anchor to.
+function isFullDisplayDock(window) {
+  const rect = window.frameGeometry;
+  const screen = window.output && window.output.geometry;
+  return Boolean(
+    window.dock && screen && rect.width > screen.width / 2 && rect.height > screen.height / 2,
   );
+}
+
+function isPanel(window) {
+  const rect = window.frameGeometry;
+  return window.dock && rect.width > 0 && rect.height > 0 && !isFullDisplayDock(window);
+}
+
+function panelWindows() {
+  return workspace.windowList().filter(isPanel);
+}
+
+function unmeasuredDockAt(point) {
+  return workspace.windowList().some((window) =>
+    isFullDisplayDock(window) && contains(window.frameGeometry, point),
+  );
+}
+
+// Edge anchors only stand in for a bar KWin cannot measure, so they lapse
+// once that output gains a measurable panel or loses its full-display dock.
+function edgeAnchorUsable(output, panels, removed) {
+  return workspace.screens.includes(output) &&
+    !panels.some((panel) => panel.output === output && panel !== removed) &&
+    workspace.windowList().some((window) =>
+      window !== removed && isFullDisplayDock(window) && window.output === output);
+}
+
+// A bar beside a display edge that KWin cannot measure, rebuilt from the
+// display's current geometry so it follows resolution and scale changes.
+// `along` is the click's position along the edge and `distance` its distance
+// from the edge.
+function edgeAnchor(output, edge, along, distance) {
+  const screen = output.geometry;
+  const horizontal = edge === 'top' || edge === 'bottom';
+  const start = horizontal ? screen.x : screen.y;
+  const length = horizontal ? screen.width : screen.height;
+  if (along < start || along >= start + length) {
+    return null;
+  }
+  const thickness = Math.max(1, Math.round(distance * 2));
+  const frameGeometry = {
+    top: { x: screen.x, y: screen.y, width: screen.width, height: thickness },
+    bottom: { x: screen.x, y: screen.y + screen.height - thickness, width: screen.width, height: thickness },
+    left: { x: screen.x, y: screen.y, width: thickness, height: screen.height },
+    right: { x: screen.x + screen.width - thickness, y: screen.y, width: thickness, height: screen.height },
+  }[edge];
+  const point = {
+    top: { x: along, y: screen.y + distance },
+    bottom: { x: along, y: screen.y + screen.height - distance },
+    left: { x: screen.x + distance, y: along },
+    right: { x: screen.x + screen.width - distance, y: along },
+  }[edge];
+  return { panel: { frameGeometry, output }, edge, point, pointer: { output, edge, along, distance } };
+}
+
+// A tray click on a display with no measurable panel, such as a bar drawn
+// inside a full-display surface. The pointer sits on the icon, so the bar is
+// assumed to span from the display edge to as far past the pointer as the
+// edge is before it.
+function pointerAnchor(cursor, panels) {
+  const output = workspace.screenAt(cursor);
+  if (!output || panels.some((panel) => panel.output === output) || !unmeasuredDockAt(cursor)) {
+    return null;
+  }
+  const screen = output.geometry;
+  const distances = {
+    top: cursor.y - screen.y,
+    bottom: screen.y + screen.height - cursor.y,
+    left: cursor.x - screen.x,
+    right: screen.x + screen.width - cursor.x,
+  };
+  const edge = Object.keys(distances).reduce((a, b) => (distances[b] < distances[a] ? b : a));
+  if (distances[edge] > EDGE_REACH) {
+    return null;
+  }
+  const along = edge === 'top' || edge === 'bottom' ? cursor.x : cursor.y;
+  return edgeAnchor(output, edge, along, distances[edge]);
 }
 
 function selectAnchor(window) {
@@ -84,6 +165,20 @@ function selectAnchor(window) {
     return lastAnchor;
   }
 
+  const clickedEdge = pointerAnchor(cursor, panels);
+  if (clickedEdge) {
+    lastAnchor = clickedEdge;
+    return lastAnchor;
+  }
+
+  if (lastAnchor && lastAnchor.pointer) {
+    const { output, edge, along, distance } = lastAnchor.pointer;
+    lastAnchor = edgeAnchorUsable(output, panels) ? edgeAnchor(output, edge, along, distance) : null;
+    if (lastAnchor) {
+      return lastAnchor;
+    }
+  }
+
   if (lastAnchor && panels.includes(lastAnchor.panel)) {
     const panel = lastAnchor.panel;
     const edge = edgeOf(panel.frameGeometry, panel.output.geometry);
@@ -94,7 +189,8 @@ function selectAnchor(window) {
   lastAnchor = null;
 
   const output = workspace.screenAt(cursor) || window.output;
-  const panel = panels.find((candidate) => candidate.output === output);
+  const onOutput = panels.filter((candidate) => candidate.output === output);
+  const panel = onOutput.find((candidate) => String(candidate.resourceClass) === 'plasmashell') || onOutput[0];
   if (!panel) {
     return null;
   }
@@ -135,6 +231,9 @@ function track(window) {
   }
   const entry = { window, anchor: null, moving: false };
   windows.set(window, entry);
+  // Electron cannot keep a window above others on Wayland, so a popup opened
+  // from the tray would otherwise open behind the window that has focus.
+  window.keepAbove = true;
   const onShow = () => {
     entry.anchor = selectAnchor(window);
     place(entry);
@@ -157,13 +256,25 @@ function track(window) {
 }
 
 workspace.windowAdded.connect(track);
+// KWin may still list a window while announcing its removal, so it is
+// excluded explicitly when checking whether an edge anchor still has a dock.
+function anchoredTo(anchor, window) {
+  if (!anchor) {
+    return false;
+  }
+  if (anchor.pointer) {
+    return Boolean(window.dock) && !edgeAnchorUsable(anchor.pointer.output, panelWindows(), window);
+  }
+  return anchor.panel === window;
+}
+
 workspace.windowRemoved.connect((window) => {
-  if (lastAnchor && lastAnchor.panel === window) {
+  if (anchoredTo(lastAnchor, window)) {
     lastAnchor = null;
   }
   for (const entry of windows.values()) {
-    if (entry.anchor && entry.anchor.panel === window) {
-      entry.anchor = selectAnchor(entry.window);
+    if (anchoredTo(entry.anchor, window)) {
+      entry.anchor = entry.anchor.pointer ? null : selectAnchor(entry.window);
       place(entry);
     }
   }

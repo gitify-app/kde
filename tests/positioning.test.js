@@ -156,3 +156,160 @@ test('registers each window once and releases it on close', () => {
   f.window.closed.emit();
   assert.equal(f.windows.size, 0);
 });
+
+test('anchors a tray click in a bar drawn inside a full-display dock surface', () => {
+  const f = fixture();
+  f.panel.resourceClass = 'quickshell';
+  f.panel.frameGeometry = { x: 0, y: 0, width: 1919, height: 1080 };
+  f.add();
+  assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], [1250, 632]);
+});
+
+test('opens toward the display interior from a full-display bar on any edge', () => {
+  for (const [cursor, expected] of [
+    [{ x: 1000, y: 15 }, [750, 38]],
+    [{ x: 15, y: 500 }, [38, 300]],
+    [{ x: 1905, y: 500 }, [1382, 300]],
+  ]) {
+    const f = fixture();
+    f.panel.frameGeometry = { x: 0, y: 0, width: 1920, height: 1080 };
+    f.workspace.cursorPos = cursor;
+    f.add();
+    assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], expected);
+  }
+});
+
+test('remembers a full-display bar anchor across a keyboard reopen', () => {
+  const f = fixture();
+  f.panel.frameGeometry = { x: 0, y: 0, width: 1920, height: 1080 };
+  f.add();
+  f.window.hidden = true;
+  f.workspace.cursorPos = { x: 300, y: 300 };
+  f.window.hidden = false;
+  f.window.frameGeometry = { x: 710, y: 340, width: 500, height: 400 };
+  f.window.windowShown.emit();
+  assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], [1250, 632]);
+});
+
+test('uses the corner when a full-display bar is opened away from the display edge', () => {
+  const f = fixture();
+  f.panel.frameGeometry = { x: 0, y: 0, width: 1920, height: 1080 };
+  f.workspace.cursorPos = { x: 900, y: 400 };
+  f.add();
+  assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], [1412, 8]);
+});
+
+test('anchors to docks from other shells', () => {
+  const f = fixture();
+  f.panel.resourceClass = 'waybar';
+  f.panel.frameGeometry = { x: 0, y: 0, width: 1920, height: 30 };
+  f.workspace.cursorPos = { x: 1000, y: 15 };
+  f.add();
+  assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], [750, 38]);
+});
+
+test('keeps the panel anchor when a keyboard open happens near another display edge', () => {
+  const f = fixture();
+  f.add();
+  f.window.hidden = true;
+  f.workspace.cursorPos = { x: 300, y: 10 };
+  f.window.hidden = false;
+  f.window.frameGeometry = { x: 710, y: 340, width: 500, height: 400 };
+  f.window.windowShown.emit();
+  assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], [1250, 632]);
+});
+
+test('keeps Gitify above other windows', () => {
+  const f = fixture();
+  f.add();
+  assert.equal(f.window.keepAbove, true);
+});
+
+test('rebuilds a full-display bar anchor when the display changes size', () => {
+  const f = fixture();
+  f.panel.frameGeometry = { x: 0, y: 0, width: 1920, height: 1080 };
+  f.add();
+  f.output.geometry = { x: 0, y: 0, width: 2560, height: 1440 };
+  f.window.hidden = true;
+  f.workspace.cursorPos = { x: 300, y: 300 };
+  f.window.hidden = false;
+  f.window.frameGeometry = { x: 710, y: 340, width: 500, height: 400 };
+  f.window.windowShown.emit();
+  assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], [1250, 992]);
+});
+
+test('prefers the Plasma panel over other docks before the first tray click', () => {
+  const f = fixture();
+  const dock = { dock: true, resourceClass: 'latte-dock', output: f.output, frameGeometry: { x: 0, y: 0, width: 48, height: 1080 } };
+  f.allWindows.unshift(dock);
+  f.workspace.cursorPos = { x: 900, y: 400 };
+  f.add();
+  assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], [1412, 632]);
+});
+
+test('drops a full-display bar anchor once the display gains a measurable panel', () => {
+  const f = fixture();
+  f.panel.frameGeometry = { x: 0, y: 0, width: 1920, height: 1080 };
+  f.add();
+  f.panel.frameGeometry = { x: 0, y: 0, width: 1920, height: 30 };
+  f.window.hidden = true;
+  f.workspace.cursorPos = { x: 300, y: 300 };
+  f.window.hidden = false;
+  f.window.frameGeometry = { x: 710, y: 340, width: 500, height: 400 };
+  f.window.windowShown.emit();
+  assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], [1412, 38]);
+});
+
+test('drops a full-display bar anchor once its dock is gone', () => {
+  const f = fixture();
+  f.panel.frameGeometry = { x: 0, y: 0, width: 1920, height: 1080 };
+  f.add();
+  f.allWindows.splice(f.allWindows.indexOf(f.panel), 1);
+  f.window.hidden = true;
+  f.workspace.cursorPos = { x: 300, y: 300 };
+  f.window.hidden = false;
+  f.window.frameGeometry = { x: 710, y: 340, width: 500, height: 400 };
+  f.window.windowShown.emit();
+  assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], [1412, 8]);
+});
+
+test('moves an open popup to the corner when its full-display bar is removed', () => {
+  const f = fixture();
+  f.panel.frameGeometry = { x: 0, y: 0, width: 1920, height: 1080 };
+  f.add();
+  f.workspace.windowRemoved.emit(f.panel);
+  assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], [1412, 8]);
+});
+
+test('drops a full-display bar anchor once its dock shrinks to nothing', () => {
+  const f = fixture();
+  f.panel.frameGeometry = { x: 0, y: 0, width: 1920, height: 1080 };
+  f.add();
+  f.panel.frameGeometry = { x: 0, y: 0, width: 0, height: 0 };
+  f.window.hidden = true;
+  f.workspace.cursorPos = { x: 300, y: 300 };
+  f.window.hidden = false;
+  f.window.frameGeometry = { x: 710, y: 340, width: 500, height: 400 };
+  f.window.windowShown.emit();
+  assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], [1412, 8]);
+});
+
+test('keeps a full-display bar anchor while another full-display dock remains', () => {
+  const f = fixture();
+  f.panel.frameGeometry = { x: 0, y: 0, width: 1920, height: 1080 };
+  const other = { dock: true, resourceClass: 'quickshell', output: f.output, frameGeometry: { x: 0, y: 0, width: 1920, height: 1080 } };
+  f.allWindows.push(other);
+  f.add();
+  f.workspace.windowRemoved.emit(other);
+  f.window.frameGeometry = { ...f.window.frameGeometry, height: 500 };
+  assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], [1250, 532]);
+});
+
+test('moves an open popup to the corner when its shrunken full-display bar is removed', () => {
+  const f = fixture();
+  f.panel.frameGeometry = { x: 0, y: 0, width: 1920, height: 1080 };
+  f.add();
+  f.panel.frameGeometry = { x: 0, y: 0, width: 0, height: 0 };
+  f.workspace.windowRemoved.emit(f.panel);
+  assert.deepEqual([f.window.frameGeometry.x, f.window.frameGeometry.y], [1412, 8]);
+});

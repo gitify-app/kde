@@ -6,7 +6,7 @@ A KWin script that places Gitify beside the panel on native Wayland.
 
 When you click Gitify's tray icon, the popup opens next to the click position. Keyboard opens reuse the last panel anchor. Before the first tray click, it opens at the end of a panel on the pointer's display, or in the top-right corner when no panel is available.
 
-The script supports horizontal and vertical panels, floating and auto-hide panels, and multiple displays. It keeps the popup inside the usable display area and repositions it when Gitify changes size. Dialogs and other applications are left alone.
+The script supports horizontal and vertical panels, floating and auto-hide panels, and multiple displays. It also works with bars from other shells, such as Caelestia, including bars drawn inside a surface that covers the whole display; there it places the popup beside the clicked tray icon. It keeps the popup inside the usable display area, keeps it above other windows, and repositions it when Gitify changes size. Dialogs and other applications are left alone.
 
 KWin does not expose individual system-tray icon rectangles to scripts. The script therefore uses the pointer position at the panel when Gitify opens, rather than reading private Plasma widget internals. Icons opened from the tray overflow and startup opens use the remembered position or panel fallback.
 
