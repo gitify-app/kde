@@ -14,9 +14,12 @@ pnpm install
 ```
 
 ```sh
+pnpm lint:check
 pnpm test
 pnpm bundle
 ```
+
+CI runs `pnpm lint:ci`, which adds GitHub annotations to lint findings.
 
 Tests run the same script in a JavaScript VM with compositor events and cover panel placement, display boundaries, resizing, repeated opens, and window filtering.
 

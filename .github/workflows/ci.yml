@@ -22,6 +22,8 @@ jobs:
           node-version-file: .nvmrc
           cache: true
           require-lockfile: true
+      - name: Lint
+        run: pnpm lint:ci
       - name: Check syntax and placement behavior
         run: |
           node --check gitify/contents/code/main.js
