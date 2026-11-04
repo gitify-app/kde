@@ -70,7 +70,7 @@ function placement(size, area, anchor) {
 // the whole display, which gives no panel edge to anchor to.
 function isFullDisplayDock(window) {
   const rect = window.frameGeometry;
-  const screen = window.output && window.output.geometry;
+  const screen = window.output?.geometry;
   return Boolean(
     window.dock && screen && rect.width > screen.width / 2 && rect.height > screen.height / 2,
   );
@@ -171,7 +171,7 @@ function selectAnchor(window) {
     return lastAnchor;
   }
 
-  if (lastAnchor && lastAnchor.pointer) {
+  if (lastAnchor?.pointer) {
     const { output, edge, along, distance } = lastAnchor.pointer;
     lastAnchor = edgeAnchorUsable(output, panels) ? edgeAnchor(output, edge, along, distance) : null;
     if (lastAnchor) {
