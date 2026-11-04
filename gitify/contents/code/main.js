@@ -144,7 +144,8 @@ function pointerAnchor(cursor, panels) {
     left: cursor.x - screen.x,
     right: screen.x + screen.width - cursor.x,
   };
-  const edge = Object.keys(distances).reduce((a, b) => (distances[b] < distances[a] ? b : a));
+  const edges = Object.keys(distances);
+  const edge = edges.reduce((a, b) => (distances[b] < distances[a] ? b : a), edges[0]);
   if (distances[edge] > EDGE_REACH) {
     return null;
   }
