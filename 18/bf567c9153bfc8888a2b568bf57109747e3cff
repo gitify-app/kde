@@ -1,0 +1,14 @@
+.github/workflows/ci.yml
+  h_ac004aadb63da9 39-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "18bf567c9153bfc8888a2b568bf57109747e3cff",
+  "prompts": {},
+  "humans": {
+    "h_ac004aadb63da9": {
+      "author": "Adam Setch <adam.setch@outlook.com>"
+    }
+  }
+}
