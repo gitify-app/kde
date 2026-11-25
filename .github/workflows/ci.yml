@@ -37,8 +37,8 @@ jobs:
           name: gitify-kwin-script
           path: dist/gitify.kwinscript
 
-  verify-actions-lock:
-    name: Verify GitHub Actions lockfile
+  lint-actions:
+    name: Lint GitHub Actions [actionlint]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -49,6 +49,9 @@ jobs:
         with:
           persist-credentials: false
           sparse-checkout: .github/
+
+      - name: GitHub Actions linter
+        uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
 
       - name: Install GitHub Actions lockfile verifier
         run: gh extension install github/gh-actions-lock --pin "$GH_ACTIONS_LOCK_VERSION"
